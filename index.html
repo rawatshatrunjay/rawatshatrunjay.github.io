@@ -3,8 +3,194 @@
 		<title>Educating Didi</title>
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/knockout/3.4.1/knockout-min.js" integrity="sha256-PX9zWVaICUCeklczWaS9DLBb9uGN7pCkCT0Kyz1elRo=" crossorigin="anonymous"></script>
+		<style>
+			body {
+  font-family: Helvetica;
+}
+.exp-description {
+  margin-bottom: 15px;
+}
+.exp-total {
+  padding: 15px;
+}
+.exp-total h4#exp-total {
+  display: inline;
+  margin-left: 20px;
+}
+.item {
+  display: inline-block;
+}
+.exp-header-row .item {
+  font-weight: bold;
+}
+.exp-header, .exp-list {
+  margin: 5px;
+}
+.item.details {
+  width: 200px;
+}
+.item.cost {
+  padding-right: 10px;
+  text-align: right;
+  width: 100px;
+}
+.item.date {
+  text-align: center;
+  width: 50px;
+}
+.item.payment {
+  padding-left: 10px;
+  width: 120px;
+}
+		</style>
 	</head>
 	<body>
-		this is body
+                <h1 class="exp-title heading">Expense Management</h1>
+                <div class="exp-description">Welcome, this app manages your expenses.</div>
+
+                <div class="exp-details-container" id="expense-details">
+			<div id="exp-month-selector">
+				<label class="label-month" for="month">Select expenses for month:</label>
+				<select id="month" class="drop-down month" data-bind="value: currentMonth, foreach: months">
+					<option data-bind="value: $data, text: $data"></option>
+				</select>
+				<div class="exp-total">
+					<label for="exp-total">Your total expenditure this month is:</label>
+					<h4 id="exp-total" data-bind="text: totalExpense"></h4>
+				</div>
+			</div>
+			<div class="exp-header">
+				<div class="exp-header-row">
+					<div class="item details"> Reason </div>
+					<div class="item cost"> Cost </div>
+					<div class="item date"> On </div>
+					<div class="item payment"> Paid Through </div>
+				</div>
+			</div>
+			<div class="exp-list" data-bind="foreach: currentExpense">
+				<div class="exp-item">
+					<div class="item details" data-bind="text: $data.expDetails"></div>
+					<div class="item cost" data-bind="text: $data.expAmount"></div>
+					<div class="item date" data-bind="text: $data.expDate"></div>
+					<div class="item payment" data-bind="text: $data.expPaymentMode"></div>
+				</div>
+			</div>
+			
+                </div>
 	</body>
+	<script type="text/javascript">
+	(function() {
+		var SAMPLE_EXPENSE = {
+			"January" : [
+				{
+					"expDetails": "Buying books",
+					"expAmount": 4500,
+					"expDate": "3rd",
+					"expPaymentMode": "CreditCard"
+				},
+				{
+                                        "expDetails": "Dining out",
+                                        "expAmount": 2000,
+                                        "expDate": "7th",
+                                        "expPaymentMode": "CreditCard"
+                                },
+				{
+                                        "expDetails": "Movies",
+                                        "expAmount": 750,
+                                        "expDate": "13th",
+                                        "expPaymentMode": "Cash"
+                                }
+			],
+			"February": [
+				{
+                                        "expDetails": "There was a sale",
+                                        "expAmount": 13500,
+                                        "expDate": "4th",
+                                        "expPaymentMode": "CreditCard"
+                                },
+				{
+                                        "expDetails": "Car accident",
+                                        "expAmount": 76800,
+                                        "expDate": "5th",
+                                        "expPaymentMode": "Cheque"
+                                },
+			],
+			"March": [
+				{
+                                        "expDetails": "Video games",
+                                        "expAmount": 6000,
+                                        "expDate": "1st",
+                                        "expPaymentMode": "CreditCard"
+                                },
+				{
+                                        "expDetails": "Meeta's wedding gift",
+                                        "expAmount": 4500,
+                                        "expDate": "3rd",
+                                        "expPaymentMode": "CreditCard"
+                                },
+				{
+                                        "expDetails": "Quaterly grocery shopping",
+                                        "expAmount": 19000,
+                                        "expDate": "5th",
+                                        "expPaymentMode": "Cash"
+                                },
+				{
+                                        "expDetails": "Dresses!",
+                                        "expAmount": 17600,
+                                        "expDate": "21st",
+                                        "expPaymentMode": "CreditCard"
+                                }
+			]
+		};
+
+		var SampleExpense = function SampleExpense() {
+			var _this = this;
+			
+			this.expenses = ko.observable({});
+
+			this.addExpenses = function(month, expense) {
+				_this.getExpenses(month).push(expense);
+			};
+
+			this.getExpenses = function(month) {
+				return _this.expenses()[month];
+			};
+
+			this.initiateSampleExpenses = function() {
+				$.each(SAMPLE_EXPENSE, function (month, expenses) {
+					_this.expenses()[month] = ko.observableArray(expenses);
+				});
+			};
+			
+			this.initiateSampleExpenses();
+
+		};
+		var sampleExpense = new SampleExpense();
+		var ExpenseReport = function ExpenseReport() {
+			var _this = this;
+			this.months = ["January", "February", "March"];
+			this.currentMonth = ko.observable("February");
+
+			this.currentExpense = ko.observableArray();
+
+			var computeTotalExpense = function(expenses) {
+                                var total = 0;
+				_this.currentExpense.removeAll();
+                                $.each(expenses, function(idx, expense) {
+					_this.currentExpense.push(expense);
+                                        total += expense.expAmount;
+                                });
+				return total;
+                        };
+
+
+			this.totalExpense = ko.computed(function() {
+				return computeTotalExpense(sampleExpense.getExpenses(_this.currentMonth())());
+			});
+
+		};
+
+		ko.applyBindings(new ExpenseReport(), document.getElementById("expense-details"));
+	})();
+	</script>
 </html>
